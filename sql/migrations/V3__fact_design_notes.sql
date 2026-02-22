@@ -1,0 +1,3 @@
+-- V3: Fact table uses surrogate keys only.
+-- order_date intentionally NOT stored.
+-- date_sk references dim_date for star schema integrity.

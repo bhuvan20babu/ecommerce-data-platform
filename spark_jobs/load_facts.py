@@ -1,9 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_date
 from pyspark.sql.types import TimestampType
+import psycopg2
 
+# -------------------------------
+# 1. Spark Session
+# -------------------------------
 spark = SparkSession.builder \
-    .appName("LoadFactSalesProper") \
+    .appName("FactSalesRebuild_Idempotent") \
     .getOrCreate()
 
 jdbc_url = "jdbc:postgresql://ecommerce_postgres:5432/ecommerce_dw"
@@ -14,18 +18,39 @@ connection_properties = {
     "driver": "org.postgresql.Driver"
 }
 
-print("=== Reading Orders ===")
+# -------------------------------
+# 2. Truncate Fact Table
+# -------------------------------
+def truncate_fact():
+    conn = psycopg2.connect(
+        dbname="ecommerce_dw",
+        user="admin",
+        password="admin",
+        host="ecommerce_postgres",
+        port="5432"
+    )
+    cur = conn.cursor()
+    cur.execute("TRUNCATE TABLE fact_sales RESTART IDENTITY CASCADE;")
+    conn.commit()
+    cur.close()
+    conn.close()
 
+truncate_fact()
+
+print("=== fact_sales truncated ===")
+
+# -------------------------------
+# 3. Read Orders
+# -------------------------------
 orders_df = spark.read.csv(
     "/app/data/raw_orders.csv",
     header=True,
     inferSchema=True
 ).withColumn("order_date", col("order_date").cast(TimestampType()))
 
-orders_df.show()
-
-print("=== Reading Dimensions ===")
-
+# -------------------------------
+# 4. Read Dimensions
+# -------------------------------
 dim_customer = spark.read.jdbc(
     url=jdbc_url,
     table="dim_customer",
@@ -44,10 +69,9 @@ dim_date = spark.read.jdbc(
     properties=connection_properties
 )
 
-# ---------------------------
-# 1️⃣ Temporal Customer Join
-# ---------------------------
-
+# -------------------------------
+# 5. Temporal Customer Join
+# -------------------------------
 customer_join = orders_df.alias("o").join(
     dim_customer.alias("c"),
     (
@@ -61,20 +85,18 @@ customer_join = orders_df.alias("o").join(
     "left"
 )
 
-# ---------------------------
-# 2️⃣ Product Join
-# ---------------------------
-
+# -------------------------------
+# 6. Product Join
+# -------------------------------
 product_join = customer_join.join(
     dim_product.alias("p"),
     col("o.product_id") == col("p.product_id"),
     "left"
 )
 
-# ---------------------------
-# 3️⃣ Date Join (Using full_date)
-# ---------------------------
-
+# -------------------------------
+# 7. Date Join
+# -------------------------------
 product_join = product_join.withColumn(
     "order_date_only",
     to_date(col("o.order_date"))
@@ -86,10 +108,9 @@ date_join = product_join.join(
     "left"
 )
 
-# ---------------------------
-# 4️⃣ Final Fact Selection
-# ---------------------------
-
+# -------------------------------
+# 8. Final Fact Selection
+# -------------------------------
 fact_df = date_join.select(
     col("o.order_id"),
     col("c.customer_sk"),
@@ -99,9 +120,12 @@ fact_df = date_join.select(
     col("o.total_amount")
 )
 
-print("=== Fact Preview ===")
+print("=== Final Fact Output ===")
 fact_df.show()
 
+# -------------------------------
+# 9. Write Facts
+# -------------------------------
 fact_df.write.jdbc(
     url=jdbc_url,
     table="fact_sales",

@@ -1,0 +1,4 @@
+-- V2: Document addition of update_ts column for SCD2 support
+-- (Already included in V1 for fresh installs)
+-- In real systems this would contain:
+-- ALTER TABLE dim_customer ADD COLUMN update_ts TIMESTAMP;

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS dim_customer (
     country VARCHAR(100),
 
     -- SCD Type 2 columns
+    update_ts TIMESTAMP,
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP,
     is_current BOOLEAN NOT NULL DEFAULT TRUE,
@@ -33,7 +34,7 @@ CREATE TABLE IF NOT EXISTS dim_product (
     product_name VARCHAR(255),
     category VARCHAR(100),
     price NUMERIC(10,2),
-
+    update_ts TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
