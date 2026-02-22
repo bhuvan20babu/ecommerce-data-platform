@@ -1,0 +1,4 @@
+customer_id,first_name,last_name,email,city,country,update_ts
+C001,John,Doe,john@example.com,Mumbai,India,2024-02-01 09:00:00
+C001,John,Doe,john@example.com,Delhi,India,2024-03-01 08:00:00
+C002,Jane,Smith,jane@example.com,Bangalore,India,2024-01-05 12:00:00
