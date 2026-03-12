@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: postgres:14
+    image: postgres:17
     container_name: ecommerce_postgres
     restart: always
     environment:

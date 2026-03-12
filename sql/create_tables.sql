@@ -78,3 +78,37 @@ ON fact_sales(customer_sk);
 
 CREATE INDEX idx_fact_sales_product_sk
 ON fact_sales(product_sk);
+
+-- =========================
+-- PIPELINE STATE TABLE
+-- =========================
+
+CREATE TABLE pipeline_state (
+    pipeline_name TEXT PRIMARY KEY,
+    last_processed_ts TIMESTAMP
+);
+
+INSERT INTO pipeline_state
+VALUES ('customer_pipeline', '1900-01-01');
+
+-- =========================
+-- Customer Stage TABLE
+-- =========================
+
+CREATE TABLE customer_stage (
+    customer_id TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    email TEXT,
+    city TEXT,
+    country TEXT,
+    update_ts TIMESTAMP
+);
+
+-- =========================
+-- Index creation
+-- =========================
+
+CREATE UNIQUE INDEX unique_current_customer
+ON dim_customer(customer_id)
+WHERE is_current = true;
