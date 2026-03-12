@@ -1,0 +1,4 @@
+order_id,customer_id,product_id,order_date,quantity,total_amount
+O001,C001,P001,2024-02-15 10:00:00,1,800
+O002,C002,P002,2024-01-10 09:00:00,1,1800
+O003,C001,P001,2024-03-10 08:00:00,1,800
