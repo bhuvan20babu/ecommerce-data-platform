@@ -646,3 +646,25 @@ This project demonstrates real-world data engineering concepts:
 - Data freshness monitoring
 - Airflow orchestration
 - Spark-based transformations
+
+## How to Run the project:
+
+1. Clone the repository
+2. Navigate to the project directory
+3. Run `docker-compose up -d` to start the platform
+4. Use `docker ps` to verify all containers are running
+5. Access Metabase at `http://localhost:3000` to view the monitoring dashboard
+6. Use Airflow UI at `http://localhost:8080` to monitor pipeline execution
+7. Install Dependencies:
+   `docker exec -it --user root ecommerce_spark bash`
+   `python3 -m pip install psycopg2-binary`
+   `cd /opt/spark/jars`
+   `wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar`
+8. Run the `.\sql\create_tables.sql` to create the tables in DB.
+9. Enable DAG in Airflow UI and trigger the pipeline to start processing data.
+10. Monitor pipeline health and data quality metrics in the Metabase dashboard.
+11. Append the data to the raw CSV files to simulate new events and observe how the pipeline processes them in near real-time.
+   
+
+
+ 
