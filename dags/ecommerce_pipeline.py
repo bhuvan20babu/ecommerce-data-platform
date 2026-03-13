@@ -14,24 +14,19 @@ with DAG(
     catchup=False,
 ) as dag:
 
-    load_dimensions = BashOperator(
-        task_id="load_dimensions",
-        bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/load_dimensions.py"
+    bronze = BashOperator(
+        task_id="bronze_ingest",
+        bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/bronze_ingest.py"
     )
 
-    load_products = BashOperator(
-        task_id="load_products",
-        bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/load_products.py"
+    silver = BashOperator(
+    task_id="silver_deduplicate",
+    bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/silver_deduplicate.py"
     )
 
-    load_dates = BashOperator(
-        task_id="load_date_dimension",
-        bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/load_date_dimension.py"
+    gold = BashOperator(
+    task_id="gold_customer_dimension",
+    bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/load_dimensions.py"
     )
 
-    load_facts = BashOperator(
-        task_id="load_facts",
-        bash_command="docker exec ecommerce_spark /opt/spark/bin/spark-submit /app/spark_jobs/load_facts.py"
-    )
-
-    load_dimensions >> load_products >> load_dates >> load_facts
+    bronze >> silver >> gold
