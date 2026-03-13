@@ -7,6 +7,7 @@ Built using:
 - Apache Spark
 - Apache Airflow
 - PostgreSQL
+- Metabase
 - Docker
 
 Implements modern data engineering patterns:
@@ -575,6 +576,7 @@ ecommerce-data-platform
 Orchestration | Airflow |
 Processing | Apache Spark |
 Warehouse | PostgreSQL |
+Dashboard | Metabase |
 Containerization | Docker |
 Language | Python |
 
