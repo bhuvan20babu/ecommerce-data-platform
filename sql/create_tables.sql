@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS dim_customer (
     end_date TIMESTAMP,
     is_current BOOLEAN NOT NULL DEFAULT TRUE,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    hash_diff TEXT
 );
 
 CREATE INDEX idx_dim_customer_customer_id
@@ -92,23 +93,61 @@ INSERT INTO pipeline_state
 VALUES ('customer_pipeline', '1900-01-01');
 
 -- =========================
--- Customer Stage TABLE
--- =========================
-
-CREATE TABLE customer_stage (
-    customer_id TEXT,
-    first_name TEXT,
-    last_name TEXT,
-    email TEXT,
-    city TEXT,
-    country TEXT,
-    update_ts TIMESTAMP
-);
-
--- =========================
 -- Index creation
 -- =========================
 
 CREATE UNIQUE INDEX unique_current_customer
 ON dim_customer(customer_id)
 WHERE is_current = true;
+
+CREATE TABLE bronze_customer_events (
+    event_id INT,
+    customer_id TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    email TEXT,
+    city TEXT,
+    country TEXT,
+    event_time TIMESTAMP
+);
+
+CREATE TABLE silver_customer_events (
+    event_id INT,
+    customer_id TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    email TEXT,
+    city TEXT,
+    country TEXT,
+    event_time TIMESTAMP
+);
+
+CREATE TABLE dq_failed_events (
+event_id INT,
+customer_id VARCHAR(50),
+first_name VARCHAR(50),
+last_name VARCHAR(50),
+email VARCHAR(100),
+city VARCHAR(50),
+country VARCHAR(50),
+event_time TIMESTAMP,
+dq_error_reason VARCHAR(255),
+failed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE pipeline_metrics (
+pipeline_name VARCHAR(100),
+run_timestamp TIMESTAMP,
+records_processed INT,
+records_failed INT,
+records_loaded INT
+);
+
+CREATE TABLE pipeline_sla_monitor (
+pipeline_name VARCHAR(100),
+check_time TIMESTAMP,
+latest_event_time TIMESTAMP,
+freshness_minutes INT,
+sla_threshold_minutes INT,
+status VARCHAR(20)
+);
